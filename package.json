@@ -2,23 +2,26 @@
 	"//1": "describes your app and its dependencies",
 	"//2": "https://docs.npmjs.com/files/package.json",
 	"//3": "updating this file will download and update your packages",
-	"name": "my-hyperdev-app",
+	"name": "my-message_board-app",
 	"version": "0.0.1",
 	"description": "What am I about?",
 	"main": "server.js",
 	"scripts": {
-		"start": "node server.js"
+		"start": "nodemon server.js"
 	},
 	"dependencies": {
-		"express": "^4.14.0",
-		"cors": "^2.8.1",
-		"body-parser": "^1.15.2",
+		"body-parser": "^1.19.0",
 		"chai": "^3.5.0",
-		"mongodb": "^2.2.16",
 		"chai-http": "^3.0.0",
-		"mocha": "^3.2.0",
-		"zombie": "^5.0.5",
-		"helmet": "^3.1.0"
+		"cors": "^2.8.5",
+		"dotenv": "^8.0.0",
+		"express": "^4.16.4",
+		"helmet": "^3.18.0",
+		"mocha": "^3.5.3",
+		"mongodb": "^2.2.36",
+		"mongoose": "^5.5.6",
+		"nodemon": "^1.19.0",
+		"zombie": "^5.0.5"
 	},
 	"engines": {
 		"node": "4.4.3"
@@ -29,8 +32,12 @@
 	},
 	"keywords": [
 		"node",
-		"hyperdev",
 		"express"
 	],
-	"license": "MIT"
+	"license": "MIT",
+	"devDependencies": {
+		"eslint": "^5.3.0",
+		"eslint-config-airbnb-base": "^13.1.0",
+		"eslint-plugin-import": "^2.14.0"
+	}
 }
