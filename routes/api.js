@@ -58,22 +58,24 @@ module.exports = function(app) {
           { board: req.params.board },
           "board text created_on bumped_on replies"
         )
+        .sort({ bumped_on: -1 })
+        .limit(5)
         .then(doc => {
           if (doc.length === 0) {
             res.send("invalid _id");
           } else {
             res.send(doc);
+            console.log(doc.length, new Date());
           }
         });
     })
     .put((req, res) => {
-      const {  thread_id, board } = req.body;
+      const { thread_id, board } = req.body;
       threadModel.findOne({ board, _id: thread_id }).then(doc => {
-        console.log(doc, thread_id, board, req.body);
+        console.log(thread_id, board, req.body);
         if (doc.length === 0) {
           res.send("invalid id");
         } else {
-          console.log(doc.reported);
           doc.reported = true;
           doc.save();
           res.send("report successful");
