@@ -10,77 +10,58 @@
 const dotenv = require("dotenv").config();
 const expect = require("chai").expect;
 const mongoose = require("mongoose");
-const helmet = require("helmet");
 const threadModel = require("../Models/threads.js");
+const threadHandler = require("../controllers/threadController.js");
 
 mongoose.promise = global.Promise;
 mongoose.set("debug", true);
 mongoose.connect(process.env.DB);
 
 module.exports = function(app) {
-  app.use(helmet.dnsPrefetchControl());
-  app.use(helmet.referrerPolicy({ policy: "same-origin" }));
-  app.use(helmet.frameguard({ action: "sameorigin" }));
-
-  app.route("/api/threads").get((req, res) => {
-    threadModel.find({}).then(doc => {
-      res.send(doc);
-    });
-  });
+  const threadController = new threadHandler();
+  // const replyHandler = new replyHandelr();
+  app.route("/api/threads").get(threadController.findAllThreads);
+  //   threadModel.find({}).then(doc => {
+  //     res.send(doc);
+  //   });
+  // });
   app
     .route("/api/threads/:board")
-    .post(function(req, res) {
-      const { board, text, delete_password } = req.body;
-      let result = {
-        _id: mongoose.Types.ObjectId(),
-        board,
-        text,
-        delete_password,
-        created_on: new Date(),
-        bumped_on: new Date(),
-        reported: false
-      };
-      const threads = threadModel({
-        _id: result._id,
-        board,
-        text,
-        delete_password,
-        created_on: new Date(),
-        bumped_on: new Date(),
-        reported: false
-      });
-      threads.save();
-      res.send(result);
+    .post(threadController.createThread)
+    .get(threadController.findThread)
+    .put(threadController.reportThread)
+    .delete(threadController.deleteThread);
+  app
+    .route("/api/replies/:board")
+    .post((req, res) => {
+      const { thread_id, text, board, delete_password } = req.body;
+      console.log(req.body);
+      if (mongoose.Types.ObjectId.isValid(thread_id)) {
+        threadModel
+          .findOne({ _id: thread_id })
+          .then(doc => {
+            doc.bumped_on = new Date();
+            doc.replies.push({
+              reply_id: mongoose.Types.ObjectId(),
+              text,
+              delete_password,
+              created_on: new Date()
+            });
+            doc.save();
+            res.send({ doc, redirect: `/${board}/${thread_id}` });
+            console.log(doc);
+          })
+          .catch(err => { 
+            res.send(err);
+          });
+      } else {
+        res.send("invalid _id");
+      }
     })
     .get((req, res) => {
-      threadModel
-        .find(
-          { board: req.params.board },
-          "board text created_on bumped_on replies"
-        )
-        .sort({ bumped_on: -1 })
-        .limit(5)
-        .then(doc => {
-          if (doc.length === 0) {
-            res.send("invalid _id");
-          } else {
-            res.send(doc);
-            console.log(doc.length, new Date());
-          }
-        });
-    })
-    .put((req, res) => {
-      const { thread_id, board } = req.body;
-      threadModel.findOne({ board, _id: thread_id }).then(doc => {
-        console.log(thread_id, board, req.body);
-        if (doc.length === 0) {
-          res.send("invalid id");
-        } else {
-          doc.reported = true;
-          doc.save();
-          res.send("report successful");
-        }
+      const thread_id = req.body;
+      threadModel.findById(thread_id).then(doc => {
+        console.log(doc);
       });
     });
-  app.route("/api/replies/:board");
 };
