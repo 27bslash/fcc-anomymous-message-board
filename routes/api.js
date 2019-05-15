@@ -29,6 +29,7 @@ module.exports = function(app) {
     .get(threadController.findThread)
     .put(threadController.reportThread)
     .delete(threadController.deleteThread);
+    
   app
     .route("/api/replies/:board")
     .post(replyController.newReply)
