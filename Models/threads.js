@@ -10,8 +10,9 @@ const threadSchema = new Schema({
   created_on: Date,
   bumped_on: Date,
   reported: Boolean,
+  replyCount: Number,
   replies: [reply]
-});
+}); 
 
 const boardSchema = new Schema({
   _id: { type: mongoose.Schema.Types.ObjectId, unique: true },

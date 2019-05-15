@@ -19,7 +19,7 @@ function threadHandler() {
       reported: false
     });
     threads.save();
-    res.redirect(`/b/${b}/`);
+    res.status(200).redirect(`/b/${b}/`);
   };
   this.findAllThreads = (req, res) => {
     threadModel
@@ -35,7 +35,7 @@ function threadHandler() {
     threadModel
       .find(
         { board: req.params.board },
-        "board text created_on bumped_on replies"
+        "-reported -delete_password -replies.delete_password -replies.reported"
       )
       .sort({ bumped_on: -1 })
       .limit(10)
@@ -43,6 +43,12 @@ function threadHandler() {
         if (doc.length === 0) {
           console.log("invalid _id");
         } else {
+          doc.forEach(docs => {
+            docs.replyCount = docs.replies.length;
+            if (docs.replyCount > 3) {
+              docs.replies = docs.replies.slice(-3);
+            }
+          });
           res.send(doc);
         }
       });
