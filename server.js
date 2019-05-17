@@ -1,31 +1,37 @@
 "use strict";
 
-var express = require("express");
-var bodyParser = require("body-parser");
-var expect = require("chai").expect;
-var cors = require("cors");
+const express = require("express");
+const bodyParser = require("body-parser");
+const expect = require("chai").expect;
+const cors = require("cors");
 const helmet = require("helmet");
-var apiRoutes = require("./routes/api.js");
-var fccTestingRoutes = require("./routes/fcctesting.js");
-var runner = require("./test-runner");
+const apiRoutes = require("./routes/api.js");
+const fccTestingRoutes = require("./routes/fcctesting.js"); 
+const runner = require("./test-runner");
+const mongoose = require("mongoose");
 
-var app = express();
+mongoose.promise = global.Promise;
+mongoose.set("debug", true);
+mongoose.connect(process.env.DB);
+
+const app = express();
 
 app.use("/public", express.static(process.cwd() + "/public"));
 
 app.use(cors({ origin: "*" })); //For FCC testing purposes only
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json(), bodyParser.urlencoded({ extended: true }));
 
-app.use(helmet.dnsPrefetchControl());
-app.use(helmet.referrerPolicy({ policy: "same-origin" }));
-app.use(helmet.frameguard({ action: "sameorigin" }));
+app.use(
+  helmet.dnsPrefetchControl(),
+  helmet.referrerPolicy({ policy: "same-origin" }),
+  helmet.frameguard({ action: "sameorigin" })
+);
 //Sample front-end
 app.route("/b/:board/").get(function(req, res) {
   res.sendFile(process.cwd() + "/views/board.html");
 });
-app.route("/b/:board/:threadid").get(function(req, res) {
+app.route("/b/:board/:thread_id").get(function(req, res) {
   res.sendFile(process.cwd() + "/views/thread.html");
 });
 
@@ -59,7 +65,7 @@ app.listen(process.env.PORT || 3000, function() {
       try {
         runner.run();
       } catch (e) {
-        var error = e;
+        const error = e;
         console.log("Tests are not valid:");
         console.log(error);
       }

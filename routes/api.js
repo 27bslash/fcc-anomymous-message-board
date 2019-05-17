@@ -14,9 +14,7 @@ const threadModel = require("../Models/threads.js");
 const threadHandler = require("../controllers/threadController.js");
 const replyHandler = require("../controllers/replyController");
 
-mongoose.promise = global.Promise;
-mongoose.set("debug", true);
-mongoose.connect(process.env.DB);
+
 
 module.exports = function(app) {
   const threadController = new threadHandler();

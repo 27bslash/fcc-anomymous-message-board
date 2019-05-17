@@ -23,7 +23,7 @@ suite("Functional Tests", function() {
     suite("POST", function() {
       test("POST a thread", function(done) {
         chai
-          .request(server)
+          .request(server)   
           .post("/api/threads/b")
           .send({ text: "test", delete_password: "p" })
           .end((err, res) => {
@@ -46,13 +46,16 @@ suite("Functional Tests", function() {
         chai
           .request(server)
           .get("/api/threads/b")
-          .end((err, res) => {
+          .end(async (err, res) => {
+            id = await res.body[0]._id;
+            delete_id = await res.body[1]._id;
             assert.equal(res.status, 200);
             assert.isAtLeast(res.body.length, 1);
-            assert.isAtMost(res.body.length, 10);
-            console.log("body[1]", res.body[1]);
-            id = res.body[0]._id;
-            delete_id = res.body[1]._id;
+            assert.isAtMost( 
+              res.body.length,
+              10,
+              "Only shows the top 10 results"
+            );
             console.log(id, delete_id);
             done();
           });
@@ -112,7 +115,11 @@ suite("Functional Tests", function() {
           .put("/api/threads/b")
           .send({ report_id: id, board: "b" })
           .end((err, res) => {
-            assert.notEqual(res.text, "report successful");
+            assert.notEqual(
+              res.text,
+              "report successful",
+              "Expect report to Only be counted once"
+            );
             done();
           });
       });
@@ -199,7 +206,7 @@ suite("Functional Tests", function() {
         chai
           .request(server)
           .delete("/api/replies/b")
-          .send({ thread_id: id, reply_id: 'i', delete_password: "t" })
+          .send({ thread_id: id, reply_id: "i", delete_password: "t" })
           .end((err, res) => {
             assert.equal(res.text, "invalid _id");
           });
@@ -217,7 +224,7 @@ suite("Functional Tests", function() {
           .end((err, res) => {
             console.log(delete_id, res.text);
             assert.equal(res.status, 200);
-            assert.include(res.text, "delete successful ");  
+            assert.include(res.text, "delete successful ");
             done();
           });
       });
